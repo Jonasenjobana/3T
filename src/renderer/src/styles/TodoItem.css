@@ -1,0 +1,185 @@
+/* ===== Todo Item ===== */
+.todo-item-wrapper {
+  border-radius: var(--radius);
+  transition: background 0.15s;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.todo-item-wrapper:hover {
+  background: var(--bg-secondary);
+}
+
+.todo-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.todo-checkbox:hover {
+  border-color: var(--accent);
+}
+
+.todo-checkbox.checked {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.todo-content {
+  flex: 1;
+  font-size: 14px;
+  cursor: default;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.todo-item-wrapper.completed .todo-content {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.todo-edit-input {
+  flex: 1;
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+}
+
+.subtask-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.subtask-toggle:hover, .subtask-toggle.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.subtask-badge {
+  font-size: 11px;
+  color: inherit;
+}
+
+.todo-subtask-add, .todo-delete {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.todo-item-wrapper:hover .todo-subtask-add,
+.todo-item-wrapper:hover .todo-delete {
+  opacity: 1;
+}
+
+.todo-subtask-add:hover {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.todo-delete:hover {
+  color: var(--danger);
+  background: rgba(212, 64, 64, 0.08);
+}
+
+.auto-complete-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  background: rgba(74, 154, 58, 0.08);
+  border: 1px solid rgba(74, 154, 58, 0.25);
+  border-radius: 4px;
+  color: var(--success);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.auto-complete-btn:hover {
+  background: rgba(74, 154, 58, 0.15);
+}
+
+.link-picker {
+  margin-top: 6px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.link-picker-header {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.link-picker-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.link-picker-item:hover {
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+
+.subtask-link-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  transition: all 0.15s;
+}
+
+.subtask-link-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}

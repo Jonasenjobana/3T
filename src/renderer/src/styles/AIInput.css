@@ -1,0 +1,144 @@
+/* ===== AI Input ===== */
+.ai-input-container {
+  padding: 16px 0 8px;
+}
+
+.ai-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ai-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.ai-input {
+  width: 100%;
+  padding: 10px 14px;
+  padding-right: 40px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ai-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.ai-input::placeholder {
+  color: var(--text-muted);
+}
+
+.ai-loading-indicator {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 3px;
+}
+
+.ai-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: ai-bounce 1.2s ease-in-out infinite;
+}
+
+.ai-dot:nth-child(2) { animation-delay: 0.15s; }
+.ai-dot:nth-child(3) { animation-delay: 0.3s; }
+
+.add-btn {
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--accent);
+  padding: 8px 0;
+}
+
+.ai-status-icon {
+  animation: ai-spin 2s linear infinite;
+}
+
+.ai-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-top: 8px;
+  background: var(--accent-glow);
+  border: 1px solid rgba(224, 120, 48, 0.25);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ai-suggestion:hover {
+  background: rgba(224, 120, 48, 0.2);
+}
+
+.suggestion-icon {
+  font-size: 14px;
+  color: var(--accent);
+  flex-shrink: 0;
+  animation: ai-sparkle 1.5s ease-in-out infinite;
+}
+
+.suggestion-text {
+  font-size: 14px;
+  color: var(--text-primary);
+  flex: 1;
+  font-weight: 500;
+}
+
+.suggestion-cursor {
+  color: var(--accent);
+  animation: cursor-blink 0.8s step-end infinite;
+  font-weight: 300;
+}
+
+.suggestion-key {
+  font-size: 10px;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ai-error {
+  font-size: 12px;
+  color: var(--danger);
+  padding: 6px 0;
+}

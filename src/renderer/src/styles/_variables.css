@@ -1,0 +1,16 @@
+:root {
+  --bg-primary: #faf8f4;
+  --bg-secondary: #f0ece5;
+  --bg-tertiary: #e6e0d8;
+  --text-primary: #2d2418;
+  --text-secondary: #5c4f3c;
+  --text-muted: #9a8d7d;
+  --accent: #e07830;
+  --accent-hover: #cc6a24;
+  --accent-glow: rgba(224, 120, 48, 0.12);
+  --danger: #d44040;
+  --success: #4a9a3a;
+  --warning: #c89020;
+  --border: #d8d0c6;
+  --radius: 8px;
+}

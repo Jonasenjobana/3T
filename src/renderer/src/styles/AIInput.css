@@ -44,6 +44,36 @@
   gap: 3px;
 }
 
+.ai-manual-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.ai-manual-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(224, 120, 48, 0.35);
+}
+
+.ai-manual-btn:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
 .ai-dot {
   width: 5px;
   height: 5px;

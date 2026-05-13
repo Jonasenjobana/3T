@@ -1,6 +1,6 @@
-import { app, BrowserWindow, ipcMain, shell, Notification, Tray, Menu, nativeImage } from 'electron'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { app, BrowserWindow, ipcMain, shell, Notification, Tray, Menu, nativeImage, dialog } from 'electron'
+import { join, basename } from 'path'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, copyFileSync, unlinkSync } from 'fs'
 import { randomBytes } from 'crypto'
 import { loadStore, saveStore, getStore } from './store'
 import type { Todo, SubTask, Timer, TimerScheduleType } from '../shared/types'
@@ -44,6 +44,15 @@ function getAppIcon() {
   }
   // 回退到默认图标
   return null
+}
+
+function getDefaultDocPath(): string {
+  return join(app.getPath('userData'), 'docs')
+}
+
+function getDocStoragePath(): string {
+  const store = getStore()
+  return store.docStoragePath || getDefaultDocPath()
 }
 
 const gotTheLock = app.requestSingleInstanceLock()
@@ -525,6 +534,238 @@ function setupIPC(): void {
     saveStore()
     app.setLoginItemSettings({ openAtLogin: enabled })
     return enabled
+  })
+
+  ipcMain.handle('ai:getAutoComplete', () => {
+    return getStore().aiAutoComplete
+  })
+
+  ipcMain.handle('ai:setAutoComplete', (_, enabled: boolean) => {
+    const store = getStore()
+    store.aiAutoComplete = enabled
+    saveStore()
+    return enabled
+  })
+
+  // --- Doc Storage ---
+  ipcMain.handle('docs:getStoragePath', () => {
+    return getDocStoragePath()
+  })
+
+  ipcMain.handle('docs:setStoragePath', (_, path: string) => {
+    const store = getStore()
+    store.docStoragePath = path
+    saveStore()
+    return path
+  })
+
+  ipcMain.handle('docs:selectDirectory', async () => {
+    if (!mainWindow) return null
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory']
+    })
+    return result.canceled ? null : result.filePaths[0]
+  })
+
+  // --- Doc CRUD ---
+  ipcMain.handle('docs:create', async (_, parentId: string, parentType: 'todo' | 'subtask', content: string = '', fileName?: string) => {
+    const storagePath = getDocStoragePath()
+    const dirPath = join(storagePath, parentId)
+    const finalName = fileName || `${Date.now()}-${randomBytes(3).toString('hex')}.md`
+
+    if (!existsSync(dirPath)) {
+      mkdirSync(dirPath, { recursive: true })
+    }
+
+    // 处理文件名冲突，追加序号
+    let filePath = join(dirPath, finalName)
+    let displayName = finalName
+    if (existsSync(filePath)) {
+      const nameParts = finalName.split('.')
+      const ext = nameParts.pop() || 'md'
+      const base = nameParts.join('.')
+      let counter = 1
+      while (existsSync(filePath)) {
+        displayName = `${base}_${counter}.${ext}`
+        filePath = join(dirPath, displayName)
+        counter++
+      }
+    }
+
+    writeFileSync(filePath, content || '# 新建文档\n\n', 'utf-8')
+
+    return {
+      id: randomBytes(16).toString('hex'),
+      filePath,
+      fileName: displayName,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    }
+  })
+
+  ipcMain.handle('docs:import', async (_, parentId: string, parentType: 'todo' | 'subtask') => {
+    if (!mainWindow) return null
+    const result = await dialog.showOpenDialog(mainWindow, {
+      filters: [{ name: 'Markdown', extensions: ['md', 'markdown'] }],
+      properties: ['openFile']
+    })
+    if (result.canceled) return null
+
+    const sourcePath = result.filePaths[0]
+    const originalFileName = basename(sourcePath)
+    const storagePath = getDocStoragePath()
+    const dirPath = join(storagePath, parentId)
+
+    let destPath = join(dirPath, originalFileName)
+    let counter = 1
+    while (existsSync(destPath)) {
+      const nameParts = originalFileName.split('.')
+      const ext = nameParts.pop() || 'md'
+      const name = nameParts.join('.')
+      destPath = join(dirPath, `${name}_${counter}.${ext}`)
+      counter++
+    }
+
+    if (!existsSync(dirPath)) {
+      mkdirSync(dirPath, { recursive: true })
+    }
+
+    copyFileSync(sourcePath, destPath)
+
+    return {
+      id: randomBytes(16).toString('hex'),
+      filePath: destPath,
+      fileName: basename(destPath),
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    }
+  })
+
+  ipcMain.handle('docs:read', async (_, filePath: string) => {
+    if (!existsSync(filePath)) {
+      return { error: 'FILE_NOT_FOUND', exists: false }
+    }
+    try {
+      const content = readFileSync(filePath, 'utf-8')
+      return { content, exists: true }
+    } catch (err: any) {
+      return { error: err.toString(), exists: false }
+    }
+  })
+
+  ipcMain.handle('docs:write', async (_, filePath: string, content: string) => {
+    if (!existsSync(filePath)) {
+      return { error: 'FILE_NOT_FOUND', exists: false }
+    }
+    try {
+      writeFileSync(filePath, content, 'utf-8')
+      return { success: true }
+    } catch (err: any) {
+      return { error: err.toString() }
+    }
+  })
+
+  ipcMain.handle('docs:checkExists', (_, filePath: string) => {
+    return existsSync(filePath)
+  })
+
+  ipcMain.handle('docs:delete', async (_, filePath: string) => {
+    if (existsSync(filePath)) {
+      unlinkSync(filePath)
+    }
+  })
+
+  ipcMain.handle('docs:summarize', async (_, filePath: string) => {
+    const store = getStore()
+    const { apiKey, apiBase, modelName } = store.aiConfig
+
+    if (!apiKey || !apiBase || !modelName) {
+      return { error: '请先在设置中配置 AI' }
+    }
+
+    if (!existsSync(filePath)) {
+      return { error: '文件不存在' }
+    }
+
+    const content = readFileSync(filePath, 'utf-8')
+    const truncatedContent = content.slice(0, 4000)
+
+    try {
+      const url = `${apiBase.replace(/\/+$/, '')}/chat/completions`
+      const body = {
+        model: modelName,
+        messages: [
+          {
+            role: 'system',
+            content: '你是一个文档总结助手。请简洁地总结以下 markdown 文档的核心内容，不超过 100 字。'
+          },
+          { role: 'user', content: truncatedContent }
+        ],
+        max_tokens: 150,
+        temperature: 0.3,
+        thinking: { type: 'disabled' }
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(body)
+      })
+
+      if (!response.ok) {
+        const errText = await response.text()
+        return { error: `请求失败: ${response.status} ${errText}` }
+      }
+
+      const data: any = await response.json()
+      const summary = data.choices?.[0]?.message?.content?.trim() || ''
+      return { summary }
+    } catch (err: any) {
+      return { error: err.toString() }
+    }
+  })
+
+  ipcMain.handle('docs:openInExplorer', (_, filePath: string) => {
+    if (existsSync(filePath)) {
+      shell.showItemInFolder(filePath)
+    }
+  })
+
+  ipcMain.handle('docs:openFile', async (_, filePath: string) => {
+    if (existsSync(filePath)) {
+      await shell.openPath(filePath)
+    }
+  })
+
+  ipcMain.handle('settings:clearAllData', async () => {
+    if (!mainWindow) return false
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: '清除所有数据',
+      message: '确认清除所有数据？',
+      detail: '此操作将清除所有任务、定时器、AI 配置和文档存储路径设置。此操作不可恢复！',
+      buttons: ['取消', '确认清除'],
+      defaultId: 0,
+      cancelId: 0
+    })
+    if (result.response === 1) {
+      const store = getStore()
+      store.todos = []
+      store.timers = []
+      store.aiConfig = {
+        apiKey: '',
+        apiBase: 'https://api.openai.com/v1',
+        modelName: 'gpt-3.5-turbo'
+      }
+      store.docStoragePath = ''
+      store.aiAutoComplete = false
+      saveStore()
+      return true
+    }
+    return false
   })
 }
 

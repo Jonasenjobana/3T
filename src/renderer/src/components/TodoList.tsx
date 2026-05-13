@@ -6,7 +6,7 @@ interface TodoListProps {
   todos: Todo[]
   onToggle: (id: string) => void
   onDelete: (id: string) => void
-  onUpdate: (id: string, content: string) => void
+  onUpdate: (id: string, updates: Record<string, unknown>) => void
   onAddSubtask: (todoId: string, content: string, linkedTaskId?: string) => void
   onToggleSubtask: (todoId: string, subtaskId: string) => void
   onDeleteSubtask: (todoId: string, subtaskId: string) => void

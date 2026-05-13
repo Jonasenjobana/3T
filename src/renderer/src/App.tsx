@@ -20,11 +20,13 @@ function App() {
   })
   const [showSettings, setShowSettings] = useState(false)
   const [shaking, setShaking] = useState(false)
+  const [aiAutoComplete, setAIAutoComplete] = useState(false)
 
   useEffect(() => {
     window.api.getTodos().then(setTodos).catch((e) => console.error('getTodos failed:', e))
     window.api.getAIConfig().then(setAIConfig).catch((e) => console.error('getAIConfig failed:', e))
     window.api.getTimers().then(setTimers).catch((e) => console.error('getTimers failed:', e))
+    window.api.getAIAutoComplete().then(setAIAutoComplete).catch((e) => console.error('getAIAutoComplete failed:', e))
   }, [])
 
   useEffect(() => {
@@ -68,9 +70,9 @@ function App() {
     }
   }
 
-  const handleUpdateTodo = async (id: string, content: string) => {
+  const handleUpdateTodo = async (id: string, updates: Record<string, unknown>) => {
     try {
-      const todo = await window.api.updateTodo(id, { content })
+      const todo = await window.api.updateTodo(id, updates)
       if (todo) setTodos((prev) => prev.map((t) => (t.id === id ? todo : t)))
     } catch (e) {
       console.error('updateTodo failed:', e)
@@ -237,7 +239,7 @@ function App() {
 
       {page === 'todos' && (
         <>
-          <AIInput onAdd={handleAddTodo} aiConfig={aiConfig} />
+          <AIInput onAdd={handleAddTodo} aiConfig={aiConfig} aiAutoComplete={aiAutoComplete} />
           <TodoList
             todos={todos}
             onToggle={handleToggleTodo}

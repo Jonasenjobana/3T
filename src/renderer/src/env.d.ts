@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import type { Todo, AIConfig, Timer, SubTask } from '../../../shared/types'
+import type { Todo, AIConfig, Timer, SubTask, LinkedDoc } from '../../../shared/types'
 
 declare global {
   interface Window {
@@ -31,6 +31,21 @@ declare global {
       onWindowShake(callback: () => void): () => void
       getAutoStart(): Promise<boolean>
       setAutoStart(enabled: boolean): Promise<boolean>
+      getAIAutoComplete(): Promise<boolean>
+      setAIAutoComplete(enabled: boolean): Promise<boolean>
+      getDocStoragePath(): Promise<string>
+      setDocStoragePath(path: string): Promise<string>
+      selectDocStoragePath(): Promise<string | null>
+      createDoc(parentId: string, parentType: 'todo' | 'subtask', content?: string, fileName?: string): Promise<LinkedDoc | null>
+      importDoc(parentId: string, parentType: 'todo' | 'subtask'): Promise<LinkedDoc | null>
+      readDoc(filePath: string): Promise<{ content?: string; error?: string; exists: boolean }>
+      writeDoc(filePath: string, content: string): Promise<{ error?: string; success?: boolean }>
+      checkDocExists(filePath: string): Promise<boolean>
+      deleteDoc(filePath: string): Promise<void>
+      summarizeDoc(filePath: string): Promise<{ summary?: string; error?: string }>
+      openDocInExplorer(filePath: string): Promise<void>
+      openDocFile(filePath: string): Promise<void>
+      clearAllData(): Promise<boolean>
     }
   }
 }

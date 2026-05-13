@@ -5,9 +5,10 @@ import '../styles/AIInput.css'
 interface AIInputProps {
   onAdd: (content: string) => void
   aiConfig: AIConfig
+  aiAutoComplete: boolean
 }
 
-function AIInput({ onAdd, aiConfig }: AIInputProps) {
+function AIInput({ onAdd, aiConfig, aiAutoComplete }: AIInputProps) {
   const [input, setInput] = useState('')
   const [suggestion, setSuggestion] = useState('')
   const [displayedSuggestion, setDisplayedSuggestion] = useState('')
@@ -82,8 +83,18 @@ function AIInput({ onAdd, aiConfig }: AIInputProps) {
       clearTimeout(debounceRef.current)
     }
 
-    if (value.trim()) {
+    if (aiAutoComplete && value.trim()) {
       debounceRef.current = setTimeout(() => fetchSuggestion(value), 800)
+    }
+  }
+
+  const handleManualAI = () => {
+    if (input.trim() && !loading) {
+      setSuggestion('')
+      setDisplayedSuggestion('')
+      setError('')
+      stopTyping()
+      fetchSuggestion(input.trim())
     }
   }
 
@@ -144,16 +155,26 @@ function AIInput({ onAdd, aiConfig }: AIInputProps) {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder={aiConfig.apiKey ? '添加新任务... (AI 将自动补全)' : '添加新任务... (请在设置中配置 AI)'}
+            placeholder={
+              !aiConfig.apiKey ? '添加新任务... (请在设置中配置 AI)'
+              : aiAutoComplete ? '添加新任务... (AI 自动补全中)'
+              : '添加新任务... (点击 ✦ 手动触发 AI 补全)'
+            }
             spellCheck={false}
           />
-          {loading && (
+          {loading ? (
             <div className="ai-loading-indicator">
               <div className="ai-dot" />
               <div className="ai-dot" />
               <div className="ai-dot" />
             </div>
-          )}
+          ) : aiConfig.apiKey && !aiAutoComplete && input.trim() ? (
+            <button className="ai-manual-btn" onClick={handleManualAI} title="AI 补全建议" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6.4-4.8-6.4 4.8 2.4-7.2-6-4.8h7.6z"/>
+              </svg>
+            </button>
+          ) : null}
         </div>
         <button className="add-btn" onClick={handleAdd} disabled={!input.trim()}>
           添加

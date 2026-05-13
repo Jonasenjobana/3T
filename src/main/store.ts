@@ -8,6 +8,8 @@ interface StoreData {
   aiConfig: AIConfig
   timers: Timer[]
   autoStart: boolean
+  docStoragePath: string
+  aiAutoComplete: boolean
 }
 
 const defaultData: StoreData = {
@@ -18,7 +20,9 @@ const defaultData: StoreData = {
     modelName: 'gpt-3.5-turbo'
   },
   timers: [],
-  autoStart: false
+  autoStart: false,
+  docStoragePath: '',
+  aiAutoComplete: false
 }
 
 let storeData: StoreData = JSON.parse(JSON.stringify(defaultData))
@@ -32,7 +36,13 @@ function migrateData(data: Record<string, unknown>): StoreData {
   if (Array.isArray(result.todos)) {
     result.todos = result.todos.map((todo: Record<string, unknown>) => ({
       ...todo,
-      subtasks: Array.isArray(todo.subtasks) ? todo.subtasks : []
+      content: typeof todo.content === 'string' ? todo.content : String(todo.content || ''),
+      subtasks: Array.isArray(todo.subtasks)
+        ? (todo.subtasks as Record<string, unknown>[]).map((s) => ({
+            ...s,
+            content: typeof s.content === 'string' ? s.content : String(s.content || '')
+          }))
+        : []
     }))
   }
   if (Array.isArray(result.timers)) {
@@ -46,6 +56,8 @@ function migrateData(data: Record<string, unknown>): StoreData {
     }))
   }
   result.autoStart = typeof result.autoStart === 'boolean' ? result.autoStart : false
+  result.docStoragePath = result.docStoragePath || ''
+  result.aiAutoComplete = typeof result.aiAutoComplete === 'boolean' ? result.aiAutoComplete : false
   return result as StoreData
 }
 

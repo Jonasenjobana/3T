@@ -1,8 +1,18 @@
+export interface LinkedDoc {
+  id: string
+  filePath: string
+  fileName: string
+  summary?: string
+  createdAt: number
+  updatedAt: number
+}
+
 export interface SubTask {
   id: string
   content: string
   completed: boolean
   linkedTaskId?: string
+  linkedDoc?: LinkedDoc
 }
 
 export interface Todo {
@@ -10,6 +20,7 @@ export interface Todo {
   content: string
   completed: boolean
   subtasks: SubTask[]
+  linkedDoc?: LinkedDoc
   createdAt: number
   updatedAt: number
 }

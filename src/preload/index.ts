@@ -61,5 +61,26 @@ contextBridge.exposeInMainWorld('api', {
 
   // Settings
   getAutoStart: () => ipcRenderer.invoke('settings:getAutoStart'),
-  setAutoStart: (enabled: boolean) => ipcRenderer.invoke('settings:setAutoStart', enabled)
+  setAutoStart: (enabled: boolean) => ipcRenderer.invoke('settings:setAutoStart', enabled),
+  getAIAutoComplete: () => ipcRenderer.invoke('ai:getAutoComplete'),
+  setAIAutoComplete: (enabled: boolean) => ipcRenderer.invoke('ai:setAutoComplete', enabled),
+
+  // Docs
+  getDocStoragePath: () => ipcRenderer.invoke('docs:getStoragePath'),
+  setDocStoragePath: (path: string) => ipcRenderer.invoke('docs:setStoragePath', path),
+  selectDocStoragePath: () => ipcRenderer.invoke('docs:selectDirectory'),
+  createDoc: (parentId: string, parentType: 'todo' | 'subtask', content?: string, fileName?: string) =>
+    ipcRenderer.invoke('docs:create', parentId, parentType, content, fileName),
+  importDoc: (parentId: string, parentType: 'todo' | 'subtask') =>
+    ipcRenderer.invoke('docs:import', parentId, parentType),
+  readDoc: (filePath: string) => ipcRenderer.invoke('docs:read', filePath),
+  writeDoc: (filePath: string, content: string) => ipcRenderer.invoke('docs:write', filePath, content),
+  checkDocExists: (filePath: string) => ipcRenderer.invoke('docs:checkExists', filePath),
+  deleteDoc: (filePath: string) => ipcRenderer.invoke('docs:delete', filePath),
+  summarizeDoc: (filePath: string) => ipcRenderer.invoke('docs:summarize', filePath),
+  openDocInExplorer: (filePath: string) => ipcRenderer.invoke('docs:openInExplorer', filePath),
+  openDocFile: (filePath: string) => ipcRenderer.invoke('docs:openFile', filePath),
+
+  // Clear
+  clearAllData: () => ipcRenderer.invoke('settings:clearAllData')
 })

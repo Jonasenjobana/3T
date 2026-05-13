@@ -183,3 +183,236 @@
   color: var(--accent);
   border-color: var(--accent);
 }
+
+/* ===== Todo Actions ===== */
+.todo-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.todo-add-doc, .todo-import-doc {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.todo-item-wrapper:hover .todo-add-doc,
+.todo-item-wrapper:hover .todo-import-doc {
+  opacity: 1;
+}
+
+.todo-add-doc:hover, .todo-import-doc:hover {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+/* ===== Doc Toggle ===== */
+.doc-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.doc-toggle:hover, .doc-toggle.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.doc-toggle.doc-missing {
+  color: var(--danger);
+}
+
+/* ===== Doc Area ===== */
+.doc-area {
+  padding: 8px 12px 12px 42px;
+  border-top: 1px dashed var(--border-light);
+  background: var(--bg-tertiary);
+  margin: 0 8px 8px 8px;
+  border-radius: 0 0 6px 6px;
+}
+
+.doc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.doc-filename {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--mono-font);
+}
+
+.doc-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.doc-actions button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.doc-actions button:hover:not(:disabled) {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.doc-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.doc-actions button.doc-delete:hover {
+  color: var(--danger);
+  background: rgba(212, 64, 64, 0.08);
+}
+
+.doc-missing-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(212, 64, 64, 0.08);
+  border: 1px solid rgba(212, 64, 64, 0.25);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--danger);
+  margin-bottom: 8px;
+}
+
+.doc-summary {
+  padding: 10px 12px;
+  background: rgba(111, 102, 236, 0.08);
+  border: 1px solid rgba(111, 102, 236, 0.25);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.summary-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.doc-summary p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.doc-file-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: var(--mono-font);
+  transition: all 0.15s;
+}
+
+.doc-file-link:hover {
+  background: var(--accent-glow);
+  text-decoration: underline;
+}
+
+/* ===== New Doc Row ===== */
+.new-doc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 42px;
+  margin: 0 8px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.new-doc-row svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.new-doc-input {
+  flex: 1;
+  padding: 5px 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+
+.new-doc-ext {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--mono-font);
+}
+
+.new-doc-confirm,
+.new-doc-cancel {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+
+.new-doc-confirm {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.new-doc-confirm:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.new-doc-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.new-doc-cancel {
+  background: none;
+  color: var(--text-muted);
+}
+
+.new-doc-cancel:hover {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}

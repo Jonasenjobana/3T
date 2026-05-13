@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain, shell, Notification, Tray, Menu } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, Notification, Tray, Menu, nativeImage } from 'electron'
 import { join } from 'path'
+import { existsSync } from 'fs'
 import { randomBytes } from 'crypto'
 import { loadStore, saveStore, getStore } from './store'
 import type { Todo, SubTask, Timer, TimerScheduleType } from '../shared/types'
@@ -11,6 +12,58 @@ const timerIntervals = new Map<string, ReturnType<typeof setInterval>>()
 
 const isDev = !app.isPackaged
 
+function getIconPath(): string {
+  let path: string
+  if (isDev) {
+    path = join(__dirname, '../../src/public/image/icon.png')
+  } else {
+    path = join(process.resourcesPath, 'public/image/icon.png')
+  }
+  if (!existsSync(path)) {
+    console.warn('图标文件不存在:', path)
+    // 回退尝试其它路径
+    const altPath = isDev
+      ? join(__dirname, '../../src/public/image/icon.ico')
+      : join(process.resourcesPath, 'public/image/icon.ico')
+    if (existsSync(altPath)) {
+      return altPath
+    }
+  }
+  return path
+}
+
+function getAppIcon() {
+  const path = getIconPath()
+  try {
+    const icon = nativeImage.createFromPath(path)
+    if (!icon.isEmpty()) {
+      return icon
+    }
+  } catch (e) {
+    console.warn('加载图标失败:', e)
+  }
+  // 回退到默认图标
+  return null
+}
+
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      }
+      if (!mainWindow.isVisible()) {
+        mainWindow.show()
+      }
+      mainWindow.focus()
+    }
+  })
+}
+
 function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 900,
@@ -19,6 +72,7 @@ function createWindow(): void {
     minHeight: 400,
     show: false,
     autoHideMenuBar: true,
+    icon: getIconPath(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -58,6 +112,11 @@ function createWindow(): void {
 }
 
 app.whenReady().then(async () => {
+  // 设置 Windows App User Model ID，帮助任务栏正确显示图标
+  if (process.platform === 'win32') {
+    app.setAppUserModelId('com.notetask.app')
+  }
+
   loadStore()
   applyAutoStart()
   setupIPC()
@@ -110,8 +169,11 @@ function activateWindowForNotification(): void {
 }
 
 async function createTray(): Promise<void> {
-  // 使用应用自身的可执行文件图标
-  const icon = await app.getFileIcon(process.execPath, { size: 'small' })
+  let icon = getAppIcon()
+
+  if (!icon) {
+    icon = await app.getFileIcon(process.execPath, { size: 'small' })
+  }
 
   tray = new Tray(icon)
   tray.setToolTip('Note Task')
@@ -295,9 +357,8 @@ function setupIPC(): void {
         max_tokens: 80,
         temperature: 0.2
       }
-      if (modelName.toLowerCase().includes('deepseek') || modelName.toLowerCase().includes('r1')) {
-        // disable deep thinking for supported models
-      }
+      // 默认禁用深度思考，加快补齐速度
+      body.thinking = { type: 'disabled' }
 
       const response = await fetch(url, {
         method: 'POST',
